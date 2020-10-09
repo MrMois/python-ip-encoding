@@ -23,10 +23,29 @@ def get_code_image(byte1, byte2, byte3):
 
 
 def preprocessing(rgb_arr):
-    pass
+
+    (height, width, depth) = rgb_arr.shape
+    assert(depth == 3)
+
+    pp_arr = np.zeros(height, width)
+    colors = np.array([[1,0,0],[0,1,0],[0,0,1],[1,1,1],[0,0,0]]) * 255
+
+    for x in range(width):
+        for y in range(height):
+
+            min = np.inf
+            idx = 0
+
+            dists = [np.linalg.norm(rgb_arr[y,x,:] - c) for c in colors]
+            pp_arr[y,x] = np.argmin(dists)
+
+    return pp_arr
 
 
-def detect_corners(corrected_arr):
+
+
+
+def detect_corners(rgb_arr):
     pass
 
 
