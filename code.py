@@ -162,7 +162,7 @@ def extract_code_from_image(cor_rgb_arr, corners):
                 code[c,b] = 1
             elif not (pixel == colors[3]).all():
                 code[c,b] = -1
-                
+
     debug.show()
 
     return code
