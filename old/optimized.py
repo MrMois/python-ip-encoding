@@ -117,16 +117,24 @@ def extract_code_pixel(x, y, pp_arr, corners):
     return pp_arr[px[1], px[0]]
 
 
-def extract_bytes_from_photo(rgb_arr):
+def extract_bytes_from_photo(rgb_arr, debug=False):
 
     pp = preprocessing(rgb_arr)
     corners = detect_corners(pp)
+    # TODO: Check if a corner is zero!
 
     code = np.zeros((5,12))
     # Read code pixels (note: they are in 0-4 format)
     for y in range(5):
         for x in range(12):
             code[y,x] = extract_code_pixel(x, y, pp, corners)
+
+    if debug:
+        pp_img = Image.fromarray(pp * 50)
+        for c in corners:
+            dot = Image.new('L', (10,10), 255)
+            pp_img.paste(dot, (c[0], c[1]))
+        pp_img.show()
 
     if not (code[1, 1] == 2
         and code[1,10] == 2
@@ -153,15 +161,43 @@ def extract_bytes_from_photo(rgb_arr):
     return bytes
 
 
-code_arr = get_code_image_arr(15,127,255)
-img = Image.fromarray(code_arr)
-img = img.resize((img.size[0] * 10, img.size[1] * 10), Image.NEAREST)
+def is_code_photo_candidate(rgb_arr, max_dist=0.3):
 
-big = Image.new('RGB', (200, 200), 0)
-big.paste(img, (30,90))
-big.show()
+    (height, width, depth) = rgb_arr.shape
+    assert(height == 90 and width == 300 and depth == 3)
 
-big_arr = np.array(big)
+    avg1 = rgb_arr[0:30,0:30]
+    avg1 = avg1.sum(0).sum(0) / (30*30)
+    avg2 = rgb_arr[60:90,0:30]
+    avg2 = avg2.sum(0).sum(0) / (30*30)
+    avg3 = rgb_arr[0:30,270:300]
+    avg3 = avg3.sum(0).sum(0) / (30*30)
+    avg4 = rgb_arr[60:90,270:300]
+    avg4 = avg4.sum(0).sum(0) / (30*30)
 
-bytes = extract_bytes_from_photo(big_arr)
-print(bytes)
+    dist =  np.linalg.norm(avg1 - np.array([0,0,255])) + \
+            np.linalg.norm(avg2 - np.array([255,0,0])) + \
+            np.linalg.norm(avg3 - np.array([0,0,255])) + \
+            np.linalg.norm(avg4 - np.array([255,0,0]))
+
+    # print('%.2f' % dist)
+
+    return dist < 600
+
+
+
+if __name__ == '__main__':
+    bytes = np.random.randint(0, 256, 3)
+
+    print('Random bytes: ', bytes)
+
+    code_arr = get_code_image_arr(bytes[0], bytes[1], bytes[2])
+    img = Image.open('code_231_129_131.jpg')
+    """
+    scale = 40
+    img = Image.fromarray(code_arr)
+    img = img.resize((img.size[0] * scale, img.size[1] * scale), Image.NEAREST)
+    img.show()
+    """
+    img_arr = np.array(img)
+    bytes = extract_bytes_from_photo(img_arr, debug=True)
