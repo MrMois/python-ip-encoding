@@ -100,5 +100,6 @@ model.compile(optimizer='adam',
 
 train_inputs, train_truths = generate_dataset(512)
 train_inputs = train_inputs.reshape(-1, IMAGE_Y, IMAGE_X, 1)
+print(train_inputs.shape)
 
 history = model.fit(train_inputs, train_truths, epochs=20)

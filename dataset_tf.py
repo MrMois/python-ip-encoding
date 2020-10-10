@@ -44,10 +44,10 @@ def img_paste(img_src, img_tgt, tl=(0, 0)):
 
 
 def img_scale(img, scale, interpol=cv2.INTER_NEAREST):
-    return cv2.resize(img, (img.shape[1]*scale, img.shape[0] * scale), interpolation=interpol)
+    return cv2.resize(img, (int(img.shape[1]*scale), int(img.shape[0] * scale)), interpolation=interpol)
 
 
-def generate_training_pair(scale=(18,22), rotate=(0,360), transform=(0,20), input=(300, 300)):
+def generate_training_pair(scale=(15,18), rotate=(-10, 10), transform=(0,8), input=(200, 200)):
 
     bytes = np.random.randint(0, 256, 4)
     label = np.array([byte_to_bitarr(b) for b in bytes])
@@ -90,13 +90,32 @@ def generate_training_pair(scale=(18,22), rotate=(0,360), transform=(0,20), inpu
 
     image = np.zeros(input)
     image = img_paste(code, image, offset)
+    image = img_scale(image, 0.2)
+    image = image / 255.0
 
     return image, label
+
+
+def generate_dataset(size):
+    # TODO: pass params to generate_training_pair
+
+    inputs = np.zeros((size, 40, 40))
+    labels = np.zeros((size, 4*8))
+
+    for s in range(size):
+        print('\rGenerated %i/%i pairs' % (s, size), end='')
+
+        i, l = generate_training_pair()
+        inputs[s] = i
+        labels[s] = l
+
+    return inputs.reshape(-1, 40, 40, 1), labels
+
 
 if __name__ == '__main__':
 
     img, label = generate_training_pair()
-
+    print(img.shape)
     print(label)
 
     cv2.imshow('input', img)
