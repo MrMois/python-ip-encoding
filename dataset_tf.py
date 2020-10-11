@@ -50,8 +50,13 @@ def img_scale(img, scale, interpol=cv2.INTER_NEAREST):
 def generate_training_pair(scale=(15,18), rotate=(-10, 10), transform=(0,8), input=(200, 200)):
 
     bytes = np.random.randint(0, 256, 4)
-    label = np.array([byte_to_bitarr(b) for b in bytes])
-    label = label.reshape((4*8))
+    #label = np.array([byte_to_bitarr(b) for b in bytes])
+    #label = label.reshape((4*8))
+    label = np.zeros(4*256)
+    label[bytes[0]] = 1
+    label[bytes[1]+256] = 1
+    label[bytes[2]+2*256] = 1
+    label[bytes[3]+3*256] = 1
 
     code = bytes_to_code(bytes)
 
@@ -100,7 +105,7 @@ def generate_dataset(size):
     # TODO: pass params to generate_training_pair
 
     inputs = np.zeros((size, 40, 40))
-    labels = np.zeros((size, 4*8))
+    labels = np.zeros((size, 4*256))
 
     for s in range(size):
         print('\rGenerated %i/%i pairs' % (s, size), end='')

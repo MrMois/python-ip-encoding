@@ -12,12 +12,12 @@ net = models.Sequential([
     layers.MaxPool2D((2,2)),
     layers.Flatten(),
     layers.Dense(64, activation='relu'),
-    layers.Dense(32, activation='relu'),
-    layers.Dense(4*8)
+    layers.Dense(64, activation='relu'),
+    layers.Dense(1024)
 ])
 
 net.summary()
-net.compile(optimizer='adam', loss=losses.CategoricalCrossentropy(), metrics=['accuracy'])
+net.compile(optimizer=tf.keras.optimizers.Adam(0.001), loss=losses.CategoricalCrossentropy(), metrics=['accuracy'])
 
 train_images, train_labels = dataset_tf.generate_dataset(20000)
 validation_set = dataset_tf.generate_dataset(10)
